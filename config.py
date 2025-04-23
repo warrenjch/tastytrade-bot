@@ -11,9 +11,10 @@ class Config:
         if test == True:
             self.url = self.data["api-info"]["cert"]
             self.account_number = self.data["account-numbers"]["cert"]
+            self.username = self.data["login"]["cert"]
+            self.password = self.data["password"]["cert"]
         else:
             self.url = self.data["api-info"]["prod"]
             self.account_number = self.data["account-numbers"]["prod"]
-
-        self.username = self.data["personal-data"]["login"]
-        self.password = self.data["personal-data"]["password"]
+            self.username = self.data["login"]["prod"]
+            self.password = self.data["password"]["prod"]
