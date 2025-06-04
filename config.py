@@ -18,3 +18,5 @@ class Config:
             self.account_number = self.data["account-numbers"]["prod"]
             self.username = self.data["login"]["prod"]
             self.password = self.data["password"]["prod"]
+        self.tg_token = self.data["tg-bot"]["api-token"]
+        self.tg_chat_id = self.data["tg-bot"]["chat-id"]
