@@ -311,6 +311,12 @@ def ldm(d): nd = datetime(d.year + 1, 1, 1) if d.month == 12 else datetime(d.yea
 def scrape():
     SPXoptionchain = get_option_chain(session, "SPX")
     VIXoptionchain = get_option_chain(session, "VIX")
+    try:
+        treasury_bill = yf.Ticker("^IRX", session=yfsession)
+        hist = treasury_bill.history(period="1d")
+        rfr = float(hist['Close'].iloc[-1])
+    except Exception as e:
+        rfr = 4.5
 
     SPXexpiries = list(SPXoptionchain.keys())
     VIXexpiries = list(VIXoptionchain.keys())
@@ -326,8 +332,9 @@ def scrape():
     VIXspot = float(VIXdata[0].last)
 
     payload = {
-        "SPX": {"spot": SPXspot},
-        "VIX": {"spot": VIXspot}
+        "SPX": {"spot": SPXspot, "optionchain": {}},
+        "VIX": {"spot": VIXspot, "optionchain": {}},
+        "rfr": rfr
     }
 
     for exp in SPXsavelist:
@@ -335,18 +342,14 @@ def scrape():
         df = OptionMethods.convertchain(session, chain)
         df = df.apply(pd.to_numeric).replace([np.nan, np.inf, -np.inf], None)
         df = df.to_dict(orient="records")
-        payload["SPX"][exp.isoformat()] = {
-            "optionchain": df
-        }
+        payload["SPX"]["optionchain"][exp.isoformat()] = df
 
     for exp in VIXsavelist:
         chain = VIXoptionchain[exp]
         df = OptionMethods.convertchain(session, chain)
         df = df.apply(pd.to_numeric).replace([np.nan, np.inf, -np.inf], None)
         df = df.to_dict(orient="records")
-        payload["VIX"][exp.isoformat()] = {
-            "optionchain": df
-        }
+        payload["VIX"]["optionchain"][exp.isoformat()] = df
 
     snapshot = {
         "date": date.today().isoformat(),
