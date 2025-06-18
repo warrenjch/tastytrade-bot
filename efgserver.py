@@ -96,6 +96,7 @@ def efg():
     #TODO: some way to push this data at 4am to tg
     VXfutures = Future.get(session, symbols = None, product_codes=["VX"])
     VXfutures = sorted(VXfutures, key=lambda x: x.last_trade_date)
+    VXfutures = [f for f in VXfutures if f.last_trade_date > date.today()]
     VXfm = VXfutures[0]
     VXbm = VXfutures[1]
     VXfmdata = get_market_data_by_type(session,futures=[VXfm.symbol])
