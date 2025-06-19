@@ -20,3 +20,6 @@ class Config:
             self.password = self.data["password"]["prod"]
         self.tg_token = self.data["tg-bot"]["api-token"]
         self.tg_chat_id = self.data["tg-bot"]["chat-id"]
+        self.database_url = self.data["database"]["url"]
+        self.database_anon_key = self.data["database"]["anon-key"]
+        self.database_service_key = self.data["database"]["service-key"]

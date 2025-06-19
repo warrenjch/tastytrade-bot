@@ -73,3 +73,11 @@ class OptionMethods:
             [["cbid", "cask", "strike", "pbid", "pask"]]
         )
         return dfchain
+
+    @staticmethod
+    def find_atmf_strike(chain):
+        c = chain.copy()
+        c['cmid'] = (c['cbid'] + c['cask']) / 2
+        c['pmid'] = (c['pbid'] + c['pask']) / 2
+        atmfs = c.loc[abs(c['cmid'] - c['pmid']).idxmin(), "strike"]
+        return atmfs
