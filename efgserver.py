@@ -7,7 +7,7 @@ from tastytrade.market_data import *
 from tastytrade.market_sessions import ExchangeType, get_market_sessions, MarketStatus
 import yfinance as yf
 from curl_cffi import requests as yfrequests
-from itertools import chain
+from itertools import chain, groupby
 from config import *
 from alphas import *
 from auxiliary import *
@@ -307,8 +307,6 @@ def efg():
 
 # =============================================================================
 # scraping
-def ldm(d): nd = datetime(d.year + 1, 1, 1) if d.month == 12 else datetime(d.year, d.month + 1,
-                                                                               1); return nd - timedelta(days=1)
 def scrape():
     SPXoptionchain = get_option_chain(session, "SPX")
     VIXoptionchain = get_option_chain(session, "VIX")
@@ -326,9 +324,11 @@ def scrape():
     VIXdata = get_market_data_by_type(session, indices=['VIX'])
     first5 = SPXexpiries[:5]
     sd = first5[-1] + timedelta(days=1)
-    eoms = [d for d in SPXexpiries if d >= sd and d.day == ldm(d).day][:6]
+    relevant_expiries = [d for d in SPXexpiries if d >= sd]
+    grouped = groupby(relevant_expiries, key=lambda d: (d.year, d.month))
+    eoms = [max(group) for (year, month), group in grouped][:13]
     SPXsavelist = first5 + eoms
-    VIXsavelist = VIXexpiries[:10]
+    VIXsavelist = VIXexpiries[:12]
     SPXspot = float(SPXdata[0].last)
     VIXspot = float(VIXdata[0].last)
 
@@ -340,6 +340,8 @@ def scrape():
 
     for exp in SPXsavelist:
         chain = [opt for opt in SPXoptionchain[exp] if opt.settlement_type == "PM"]
+        if chain == []:
+            chain = SPXoptionchain[exp]
         df = OptionMethods.convertchain(session, chain)
         df = df.apply(pd.to_numeric).replace([np.nan, np.inf, -np.inf], None)
         df = df.to_dict(orient="records")
