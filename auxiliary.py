@@ -49,7 +49,9 @@ class OptionMethods:
         wrong = vc[vc != 2]
 
         # assert, printing out the offending strike_price values
-        assert wrong.empty, f"Strikes without exactly two entries: {wrong.index.tolist()}"
+        if not wrong.empty:
+            print(f"Strikes without exactly two entries: {wrong.index.tolist()}")
+            df = df[~df["strike_price"].isin(wrong.index)]
 
         df["type"] = df["option_type"].apply(
             lambda ot: "C" if ot == OptionType.CALL
@@ -121,7 +123,6 @@ class OptionMethods:
         atm_row = df.loc[df['strike'] == K_atm].iloc[0]
         cmid_atm, pmid_atm = atm_row['cmid'], atm_row['pmid']
         F = K_atm + np.exp((rfr-div_yield) * T) * (cmid_atm - pmid_atm)
-        print(F)
 
         civ_list, piv_list = [], []
         for _, row in df.iterrows():
